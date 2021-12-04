@@ -6,7 +6,10 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -14,6 +17,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+
+import org.w3c.dom.Text;
 
 /**
  * Modify this small program adding new filters.
@@ -35,7 +40,18 @@ public final class LambdaFilter extends JFrame {
     private static final long serialVersionUID = 1760990730218643730L;
 
     private enum Command {
-        IDENTITY("No modifications", Function.identity());
+        IDENTITY("No modifications", Function.identity()),
+        TO_LOWER_CASE("To lowercase", String::toLowerCase),
+        COUNT_CHARS("Count the number of characters", text -> "The text has: " + text.replaceAll("\n", "").length() + " characters"),
+        COUNT_LINES("Count the number of lines", text -> "The text has: " + text.lines().count() + " lines"),
+        ALPHABETICAL_SORT("List all the words in alphabetical order", text -> Arrays.stream(text.split(" "))
+                .sorted()
+                .collect(Collectors.joining("\n"))),
+        COUNT_WORDS("Count each word occurrency", text -> Arrays.stream(text.split(" "))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream()
+                .map(word -> word.getKey() + " -> " + word.getValue())
+                .collect(Collectors.joining("\n")));
 
         private final String commandName;
         private final Function<String, String> fun;
